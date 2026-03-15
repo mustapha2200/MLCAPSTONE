@@ -48,5 +48,8 @@ DEFAULT_TAILLE_RUE  = _geo_meta.get('default_taille_rue', 6.5)
 
 MRU_TO_EUR = 1 / 400
 
+from datetime import date
+DATE_REF = date(2026, 3, 2)
+
 # Infos modèle — lues depuis les fichiers pkl au démarrage de app.py
 # (MODEL_INFO est construit dynamiquement dans app.py)
