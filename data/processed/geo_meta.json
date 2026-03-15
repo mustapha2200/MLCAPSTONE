@@ -1,0 +1,199 @@
+{
+  "quartiers": {
+    "Tevragh Zeina": {
+      "lat": 18.1036,
+      "lon": -15.9785,
+      "caractere": "Quartier huppé, ambassades, villas",
+      "poi": {
+        "ecoles": 8,
+        "mosquees": 6,
+        "commerces": 15,
+        "hopitaux": 4
+      }
+    },
+    "Ksar": {
+      "lat": 18.0866,
+      "lon": -15.975,
+      "caractere": "Centre historique",
+      "poi": {
+        "ecoles": 6,
+        "mosquees": 10,
+        "commerces": 20,
+        "hopitaux": 3
+      }
+    },
+    "Teyarett": {
+      "lat": 18.095,
+      "lon": -15.97,
+      "caractere": "Centre, mixte",
+      "poi": {
+        "ecoles": 5,
+        "mosquees": 8,
+        "commerces": 12,
+        "hopitaux": 2
+      }
+    },
+    "Sebkha": {
+      "lat": 18.073,
+      "lon": -15.987,
+      "caractere": "Commercial, marchés",
+      "poi": {
+        "ecoles": 4,
+        "mosquees": 7,
+        "commerces": 25,
+        "hopitaux": 2
+      }
+    },
+    "Arafat": {
+      "lat": 18.055,
+      "lon": -15.961,
+      "caractere": "Populaire, dense",
+      "poi": {
+        "ecoles": 6,
+        "mosquees": 12,
+        "commerces": 10,
+        "hopitaux": 1
+      }
+    },
+    "Dar Naim": {
+      "lat": 18.12,
+      "lon": -15.945,
+      "caractere": "Résidentiel, expansion",
+      "poi": {
+        "ecoles": 4,
+        "mosquees": 5,
+        "commerces": 8,
+        "hopitaux": 1
+      }
+    },
+    "Riyadh": {
+      "lat": 18.085,
+      "lon": -15.955,
+      "caractere": "Résidentiel moyen",
+      "poi": {
+        "ecoles": 3,
+        "mosquees": 4,
+        "commerces": 6,
+        "hopitaux": 1
+      }
+    },
+    "Toujounine": {
+      "lat": 18.068,
+      "lon": -15.935,
+      "caractere": "Périphérie, récent",
+      "poi": {
+        "ecoles": 3,
+        "mosquees": 6,
+        "commerces": 5,
+        "hopitaux": 0
+      }
+    }
+  },
+  "reference_points": {
+    "centre": {
+      "lat": 18.0866,
+      "lon": -15.975,
+      "label": "Centre-ville (Ksar)"
+    },
+    "aeroport": {
+      "lat": 18.0987,
+      "lon": -15.9476,
+      "label": "Aéroport Oumtounsy"
+    },
+    "plage": {
+      "lat": 18.058,
+      "lon": -16.02,
+      "label": "Plage El Mina"
+    }
+  },
+  "feature_importance": {
+    "surface_x_target": 0.062569,
+    "surface_squared": 0.038428,
+    "tfidf_12": 0.036596,
+    "nb_pieces_total": 0.036581,
+    "tfidf_13": 0.031205,
+    "dist_centre_km": 0.031136,
+    "tfidf_4": 0.028844,
+    "tfidf_6": 0.028395,
+    "tfidf_14": 0.025971,
+    "surface_vs_quartier": 0.025078,
+    "tfidf_19": 0.024684,
+    "log_surface_x_target": 0.02445,
+    "surface_m2": 0.024247,
+    "tfidf_8": 0.024144,
+    "tfidf_11": 0.023943,
+    "tfidf_7": 0.023021,
+    "tfidf_5": 0.020796,
+    "log_chambres": 0.020452,
+    "nb_salons": 0.018759,
+    "tfidf_16": 0.018578,
+    "densite_pieces": 0.017321,
+    "desc_len": 0.01724,
+    "tfidf_15": 0.017123,
+    "tfidf_0": 0.01584,
+    "quartier_target_smooth": 0.015286,
+    "nb_hopitaux_1km": 0.01518,
+    "tfidf_1": 0.01494,
+    "tfidf_9": 0.014729,
+    "age_annonce_jours": 0.014462,
+    "tfidf_17": 0.014178,
+    "log_surface": 0.014065,
+    "nb_commerces_1km": 0.013045,
+    "tfidf_2": 0.012995,
+    "tfidf_18": 0.012914,
+    "nb_balcons": 0.012912,
+    "nb_chambres": 0.012745,
+    "tfidf_3": 0.012737,
+    "tfidf_10": 0.012694,
+    "surface_par_piece": 0.012691,
+    "taille_rue": 0.011322,
+    "desc_word_count": 0.011143,
+    "quartier_freq": 0.010945,
+    "mois_publication": 0.010578,
+    "nb_ecoles_1km": 0.010443,
+    "desc_nb_digits": 0.009922,
+    "chambres_vs_quartier": 0.009628,
+    "is_renove": 0.008715,
+    "has_garage": 0.008148,
+    "nb_mosquees_1km": 0.007817,
+    "quartier_target_enc": 0.007449,
+    "dist_plage_km": 0.007297,
+    "latitude": 0.006317,
+    "dist_aeroport_km": 0.005108,
+    "quartier_prix_std": 0.005045,
+    "longitude": 0.004876,
+    "nb_total_pois_1km": 0.004508,
+    "has_duplex": 0.004137,
+    "is_weekend": 0.00409,
+    "trimestre": 0.003565,
+    "nb_sdb": 0.003221,
+    "has_etage": 0.001187,
+    "has_camera": 0.001109,
+    "has_meuble": 0.000876,
+    "desc_has_numbers": 0.000595,
+    "has_arabic": 0.000318,
+    "mention_coin": 0.000284,
+    "mention_prix_neg": 0.000187,
+    "mention_urgent": 8.1e-05,
+    "has_piscine": 7.9e-05,
+    "has_sdb_info": 1.9e-05,
+    "has_titre_foncier": 1.9e-05,
+    "has_clim": 0.0,
+    "is_luxe": 0.0,
+    "has_jardin": 0.0,
+    "has_terrasse": 0.0,
+    "has_carrelage": 0.0,
+    "has_2_facades": 0.0
+  },
+  "cv_rmsle": 0.6263,
+  "cv_r2": null,
+  "model_comparison": [
+    { "name": "Baseline",         "rmsle": 0.999, "r2": 0.00  },
+    { "name": "Ridge",            "rmsle": 0.812, "r2": 0.32  },
+    { "name": "Random Forest",    "rmsle": 0.658, "r2": 0.56  },
+    { "name": "XGBoost",          "rmsle": 0.648, "r2": 0.58  },
+    { "name": "LightGBM",         "rmsle": 0.641, "r2": 0.59  },
+    { "name": "CatBoost",         "rmsle": 0.638, "r2": 0.60  },
+    { "name": "Stacking",         "rmsle": 0.626, "r2": 0.62  }
+  ]
+}

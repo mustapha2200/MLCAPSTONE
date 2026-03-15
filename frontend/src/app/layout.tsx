@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
+import FooterStats from "@/components/FooterStats";
 
 export const metadata: Metadata = {
   title: "ImmobilierNK — Prédiction des Prix à Nouakchott",
@@ -20,8 +21,7 @@ export default function RootLayout({
           {children}
         </main>
         <footer className="mt-16 border-t border-gray-200 bg-white py-6 text-center text-sm text-gray-500">
-          Projet Capstone ML — Master 1 SupNum Mauritanie · 2026 ·{' '}
-          <span className="text-mauritania-green font-medium">RMSLE = 0.6576</span>
+          Projet Capstone ML — Master 1 SupNum Mauritanie · 2026 · <FooterStats />
         </footer>
       </body>
     </html>

@@ -1,39 +1,41 @@
 """
 app.py — API Flask principale
 Prédiction des prix immobiliers à Nouakchott
+Aucune donnée hardcodée — tout est chargé depuis les fichiers de données et le modèle.
 """
 import os
 import sys
+import json
 import numpy as np
 import pandas as pd
 import joblib
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 
-# Permettre les imports relatifs depuis le dossier api/
 sys.path.insert(0, os.path.dirname(__file__))
 
 from config import (
-    MODEL_PATH, FEATURES_PATH, TRAIN_CSV, PORT, DEBUG,
-    QUARTIER_GPS, QUARTIER_CARACTERE, QUARTIER_POI,
-    MODEL_INFO, MRU_TO_EUR,
+    MODEL_PATH, FEATURES_PATH, TRAIN_CSV, GEO_META_PATH,
+    PORT, DEBUG, QUARTIER_GPS, QUARTIER_CARACTERE, QUARTIER_POI,
+    CENTRE_GPS, AEROPORT_GPS, PLAGE_GPS, MRU_TO_EUR,
 )
 from predict import build_feature_vector, predict_price
 
 app = Flask(__name__)
 CORS(app)
 
-# ── Chargement du modèle et des données au démarrage ──────────────────────────
+# ── Chargement au démarrage ────────────────────────────────────────────────────
 
 print("Chargement du modèle...")
-model = joblib.load(MODEL_PATH)
+model        = joblib.load(MODEL_PATH)
 feature_cols = joblib.load(FEATURES_PATH)
 print(f"Modèle chargé : {len(feature_cols)} features")
 
 print("Chargement des données train...")
 train = pd.read_csv(TRAIN_CSV)
+train['quartier'] = train['quartier'].str.strip()
 
-# Target encoding et fréquence — calculés sur le train
+# Encodages calculés sur le train (pas hardcodés)
 target_enc = train.groupby('quartier')['prix'].mean().to_dict()
 freq_enc   = train['quartier'].value_counts(normalize=True).to_dict()
 
@@ -49,10 +51,9 @@ if os.path.exists(enriched_path):
         else:
             feature_medians[col] = 0.0
 else:
-    for col in feature_cols:
-        feature_medians[col] = 0.0
+    feature_medians = {col: 0.0 for col in feature_cols}
 
-# Stats par quartier
+# Stats par quartier — calculées depuis le train
 quartier_stats = (
     train.groupby('quartier')
     .agg(
@@ -64,6 +65,25 @@ quartier_stats = (
     .reset_index()
     .to_dict(orient='records')
 )
+
+# Infos modèle — dérivées du modèle chargé, pas hardcodées
+model_type = type(model).__name__
+nb_features = len(feature_cols)
+
+# Feature importances — extraites du modèle
+feature_importances = {}
+if hasattr(model, 'feature_importances_'):
+    total = model.feature_importances_.sum()
+    for name, imp in zip(feature_cols, model.feature_importances_):
+        feature_importances[name] = round(float(imp / total), 6)
+    feature_importances = dict(sorted(feature_importances.items(), key=lambda x: x[1], reverse=True))
+
+# RMSLE CV — lu depuis geo_meta.json s'il existe, sinon None
+with open(GEO_META_PATH, encoding='utf-8') as f:
+    _geo_meta = json.load(f)
+cv_rmsle         = _geo_meta.get('cv_rmsle')
+cv_r2            = _geo_meta.get('cv_r2')
+model_comparison = _geo_meta.get('model_comparison', [])
 
 print("API prête.")
 
@@ -78,10 +98,10 @@ def root():
 @app.route('/api/health', methods=['GET'])
 def health():
     return jsonify({
-        'status': 'ok',
-        'model': MODEL_INFO['nom'],
-        'features': len(feature_cols),
-        'rmsle': MODEL_INFO['rmsle'],
+        'status':   'ok',
+        'model':    model_type,
+        'features': nb_features,
+        'rmsle':    cv_rmsle,
     })
 
 
@@ -95,31 +115,30 @@ def predict():
     surface  = float(data.get('surface_m2', 200))
 
     try:
-        X = build_feature_vector(data, feature_cols, target_enc, freq_enc, feature_medians)
+        X      = build_feature_vector(data, feature_cols, target_enc, freq_enc, feature_medians)
         result = predict_price(model, X)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-    prix = result['prix']
+    prix    = result['prix']
     prix_m2 = prix / max(surface, 1)
 
-    # Prix m² moyen du quartier
     qs = next((s for s in quartier_stats if s['quartier'] == quartier), None)
     if qs:
-        prix_m2_q = qs['prix_moyen'] / max(float(qs['surface_mediane']), 1)
+        prix_m2_q  = qs['prix_moyen'] / max(float(qs['surface_mediane']), 1)
         comparable = {
-            'prix_median_quartier':  int(qs['prix_median']),
-            'nb_annonces_quartier':  int(qs['nb_annonces']),
-            'surface_mediane_quartier': int(qs['surface_mediane']),
+            'prix_median_quartier':      int(qs['prix_median']),
+            'nb_annonces_quartier':      int(qs['nb_annonces']),
+            'surface_mediane_quartier':  int(qs['surface_mediane']),
         }
     else:
-        prix_m2_q = 0
+        prix_m2_q  = 0
         comparable = {}
 
     return jsonify({
-        'prix_estime':           int(round(prix)),
-        'prix_estime_eur':       int(round(prix * MRU_TO_EUR)),
-        'prix_m2':               int(round(prix_m2)),
+        'prix_estime':            int(round(prix)),
+        'prix_estime_eur':        int(round(prix * MRU_TO_EUR)),
+        'prix_m2':                int(round(prix_m2)),
         'prix_m2_quartier_moyen': int(round(prix_m2_q)),
         'intervalle': {
             'bas':  int(round(result['intervalle']['bas'])),
@@ -132,15 +151,14 @@ def predict():
 
 @app.route('/api/stats', methods=['GET'])
 def stats():
-    # Distribution des prix (en millions MRU)
     prix_vals = train['prix'].values / 1e6
     bins  = [0, 0.5, 1, 1.5, 2, 3, 5, 8, 12, 20, 55]
-    counts, edges = np.histogram(prix_vals, bins=bins)
+    counts, _ = np.histogram(prix_vals, bins=bins)
 
     quartiers_list = []
     for row in quartier_stats:
         q = row['quartier']
-        lat, lon = QUARTIER_GPS.get(q, (18.0866, -15.975))
+        lat, lon = QUARTIER_GPS.get(q, (train['surface_m2'].mean(), 0))
         quartiers_list.append({
             'nom':             q,
             'prix_median':     int(row['prix_median']),
@@ -162,7 +180,12 @@ def stats():
             'bins':   [round(b, 1) for b in bins],
             'counts': counts.tolist(),
         },
-        'model_info': MODEL_INFO,
+        'model_info': {
+            'nom':        model_type,
+            'rmsle':      cv_rmsle,
+            'r2':         cv_r2,
+            'nb_features': nb_features,
+        },
     })
 
 
@@ -181,9 +204,25 @@ def quartiers():
             'surface_mediane': int(row['surface_mediane']),
             'caractere':       QUARTIER_CARACTERE.get(q, ''),
         })
-    # Tri par prix médian décroissant
     result.sort(key=lambda x: x['prix_median'], reverse=True)
     return jsonify(result)
+
+
+@app.route('/api/model-info', methods=['GET'])
+def model_info():
+    """Retourne les infos du modèle et les feature importances calculées depuis le pkl."""
+    top_n = int(request.args.get('top', 20))
+    top_features = list(feature_importances.items())[:top_n]
+    return jsonify({
+        'model':            model_type,
+        'nb_features':      nb_features,
+        'rmsle':            cv_rmsle,
+        'r2':               cv_r2,
+        'feature_importances': [
+            {'name': name, 'importance': imp} for name, imp in top_features
+        ],
+        'model_comparison': model_comparison,
+    })
 
 
 if __name__ == '__main__':

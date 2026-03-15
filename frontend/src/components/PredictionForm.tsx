@@ -1,12 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { PredictionRequest } from '@/types';
-import { QUARTIERS } from '@/lib/constants';
+import { PredictionRequest, Quartier } from '@/types';
 
 interface Props {
   onSubmit: (data: PredictionRequest) => void;
   loading: boolean;
+  quartiers: Quartier[];
 }
 
 const defaultValues: PredictionRequest = {
@@ -22,7 +22,7 @@ const defaultValues: PredictionRequest = {
   description:      '',
 };
 
-export default function PredictionForm({ onSubmit, loading }: Props) {
+export default function PredictionForm({ onSubmit, loading, quartiers }: Props) {
   const [form, setForm] = useState<PredictionRequest>(defaultValues);
 
   const setField = (key: keyof PredictionRequest, val: number | string | null) =>
@@ -44,7 +44,7 @@ export default function PredictionForm({ onSubmit, loading }: Props) {
           className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-mauritania-green"
           required
         >
-          {QUARTIERS.map((q) => (
+          {quartiers.map((q) => (
             <option key={q.nom} value={q.nom}>
               {q.nom} — {q.caractere}
             </option>

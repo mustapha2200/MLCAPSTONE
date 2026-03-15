@@ -51,8 +51,17 @@ export interface MarketStats {
   };
   model_info: {
     nom: string;
-    rmsle: number;
-    r2: number;
+    rmsle: number | null;
+    r2: number | null;
     nb_features: number;
   };
+}
+
+export interface ModelInfo {
+  model: string;
+  nb_features: number;
+  rmsle: number | null;
+  r2: number | null;
+  feature_importances: { name: string; importance: number }[];
+  model_comparison: { name: string; rmsle: number; r2: number }[];
 }

@@ -5,13 +5,24 @@ Compétition Kaggle interne évaluée sur le **RMSLE** (Root Mean Squared Logari
 
 ---
 
+## Résultats
+
+| Version | Modèle | RMSLE CV | Score Kaggle |
+|---------|--------|----------|-------------|
+| Baseline | Médiane | ~0.999 | — |
+| V1 | Random Forest (34 features) | 0.6576 | 0.62405 (6ème) |
+| **V2** | **Stacking CatBoost+XGB+LGB+RF+Ridge (77 features)** | **0.6263** | En cours |
+| Top 1 leaderboard | — | — | 0.55941 |
+
+**Déploiement :**
+- API : [https://mlcapstone.onrender.com](https://mlcapstone.onrender.com)
+- Interface : [https://immobilier-nouakchott.vercel.app](https://immobilier-nouakchott.vercel.app)
+
+---
+
 ## Contexte
 
 En Mauritanie, il n'existe pas de base de données publique sur les prix immobiliers. Les prix sont négociés de gré à gré et les annonces sont dispersées sur le web. Ce projet construit un pipeline ML complet pour prédire les prix de vente à Nouakchott à partir d'annonces immobilières scrappées.
-
-- **Baseline** (prédiction par la médiane) : RMSLE ≈ 0.997
-- **Objectif** : RMSLE < 0.75 (idéalement < 0.70)
-- **Résultats obtenus** : RMSLE ≈ 0.65–0.70 avec Random Forest / Gradient Boosting
 
 ---
 
@@ -56,165 +67,182 @@ mauritania-housing-ml/
 ├── data/
 │   ├── raw/                        # Données Kaggle originales (ne pas modifier)
 │   ├── processed/                  # Données intermédiaires (clean, imputed, enriched)
-│   └── final/submission.csv        # Prédictions finales (289 lignes, colonnes id & prix)
+│   └── final/
+│       ├── submission.csv          # Prédictions V1 (Random Forest)
+│       └── submission_improved.csv # Prédictions V2 (Stacking — à soumettre)
 │
 ├── notebooks/
 │   ├── 01_inspection_nettoyage.ipynb   # Étapes 1-2 : chargement & nettoyage
 │   ├── 02_valeurs_manquantes.ipynb     # Étape 3  : analyse & imputation des NaN
-│   ├── 03_eda.ipynb                    # Étapes 4-5: outliers & visualisations EDA
-│   ├── 04_feature_engineering.ipynb   # Étape 6a : géo-enrichissement & 34 features
-│   └── 05_modelisation.ipynb           # Étape 6b : entraînement, CV, sélection du modèle
+│   ├── 03_eda.ipynb                    # Étapes 4-5 : outliers & visualisations EDA
+│   ├── 04_feature_engineering.ipynb   # Étape 6a : géo-enrichissement & features
+│   └── 05_modelisation.ipynb           # Étape 6b : entraînement, CV, sélection
 │
 ├── src/
 │   ├── data_cleaning.py            # Chargement, nettoyage, standardisation
 │   ├── geo_enrichment.py           # GPS par quartier, distances, POI
 │   ├── feature_engineering.py      # Extraction features texte/temps, encodage quartier
-│   ├── modeling.py                 # Entraînement, CV 5-fold, métriques, génération submission
-│   └── pipeline.py                 # Pipeline complet de bout en bout
+│   ├── modeling.py                 # Entraînement, CV 5-fold, métriques
+│   ├── pipeline.py                 # Pipeline V1 de bout en bout
+│   └── improve_model.py            # Pipeline V2 amélioré (NLP + stacking)
+│
+├── api/
+│   ├── app.py                      # API Flask (4 endpoints)
+│   ├── predict.py                  # Reconstruction des features pour l'inférence
+│   ├── config.py                   # GPS, POI, constantes
+│   └── requirements.txt
+│
+├── frontend/                       # Application Next.js (TypeScript + Tailwind)
+│   └── src/
+│       ├── app/                    # Pages : accueil, prédiction, analyse
+│       └── components/             # Carte Leaflet, formulaire, résultats
 │
 ├── model/
-│   ├── housing_model.pkl           # Meilleur modèle sérialisé
-│   └── features.pkl                # Liste ordonnée des 34 features
+│   ├── housing_model.pkl           # Modèle V1 (Random Forest)
+│   ├── housing_model_improved.pkl  # Modèle V2 (CatBoost — meilleur individuel)
+│   ├── features.pkl                # 34 features V1
+│   └── features_improved.pkl       # 77 features V2
 │
 └── outputs/figures/                # 8 graphiques PNG générés automatiquement
 ```
 
 ---
 
-## Pipeline — Étapes détaillées
+## Pipeline V1 — Étapes détaillées
 
-### Étape 1-2 : Chargement & Nettoyage (`01_inspection_nettoyage.ipynb`)
-- Chargement des deux CSV, inspection dimensions/types/`describe()`
-- Conversion `date_publication` en datetime
-- Standardisation des noms de quartiers (strip whitespace)
+### Étape 1-2 : Chargement & Nettoyage
+- Conversion `date_publication` en datetime, standardisation des quartiers
 - Validation plage prix (200K–54M MRU) et surface (20–2 000 m²)
 
-### Étape 3 : Valeurs manquantes (`02_valeurs_manquantes.ipynb`)
-- `nb_chambres` (1.2%) → médiane **par quartier** (MCAR)
-- `nb_sdb` (72%) → indicatrice `has_sdb_info` + médiane globale (MAR/MNAR)
-- `nb_salons` test (0.7%) → médiane par quartier depuis le train
-- `caracteristiques` → chaîne vide `""`
-- Toutes les valeurs d'imputation calculées **sur le train uniquement** (anti data leakage)
+### Étape 3 : Valeurs manquantes
+- `nb_chambres` (1.2%) → médiane par quartier | `nb_sdb` (72%) → indicatrice + médiane globale
+- Toutes les imputations calculées **sur le train uniquement** (anti data leakage)
 
-### Étapes 4-5 : EDA (`03_eda.ipynb`)
-- Analyse des outliers (IQR) — conservés car variance réelle dans le marché mauritanien
-- Distributions univariées, analyses croisées par quartier, heatmap de corrélation
-- Corrélations attendues : surface/prix ≈ 0.62, chambres/prix ≈ 0.33
+### Étapes 4-5 : EDA
+- Outliers conservés (variance réelle du marché mauritanien)
+- Corrélations : surface/prix ≈ 0.62, chambres/prix ≈ 0.33
 
-### Étape 6a : Feature Engineering (`04_feature_engineering.ipynb`)
-**34 features au total :**
+### Étape 6a : Feature Engineering V1 (34 features)
 
 | Catégorie | Features |
 |-----------|---------|
 | Structurelles | `surface_m2`, `nb_chambres`, `nb_salons`, `nb_sdb`, `has_sdb_info` |
 | Géographiques | `latitude`, `longitude`, `dist_centre_km`, `dist_aeroport_km`, `dist_plage_km` |
 | POI (1 km) | `nb_ecoles_1km`, `nb_mosquees_1km`, `nb_commerces_1km`, `nb_hopitaux_1km`, `nb_total_pois_1km` |
-| Texte/Caractéristiques | `has_garage`, `has_titre_foncier`, `has_camera`, `nb_balcons`, `taille_rue` |
-| NLP description | `desc_len`, `desc_word_count`, `has_piscine`, `has_clim`, `has_meuble`, `is_luxe`, `is_renove`, `has_arabic` |
+| Texte | `has_garage`, `has_titre_foncier`, `has_camera`, `nb_balcons`, `taille_rue` |
+| NLP basique | `desc_len`, `desc_word_count`, `has_piscine`, `has_clim`, `has_meuble`, `is_luxe`, `is_renove`, `has_arabic` |
 | Dérivées | `nb_pieces_total`, `surface_par_piece`, `log_surface`, `age_annonce_jours` |
-| Encodage quartier | `quartier_target_enc`, `quartier_freq` |
+| Encodage | `quartier_target_enc`, `quartier_freq` |
 
-**Note :** `prix_m2` n'est pas utilisé — c'est du data leakage (dérivé de la target).
+### Étape 6b : Modélisation V1
 
-### Étape 6b : Modélisation (`05_modelisation.ipynb`)
-- **Target :** `log(1 + prix)` — prédiction en log-space car la métrique est RMSLE
-- **Validation :** KFold 5-fold, shuffle=True, random_state=42
-- **Modèles comparés :**
-
-| Modèle | RMSLE (CV) |
-|--------|-----------|
+| Modèle | RMSLE CV |
+|--------|----------|
 | Baseline (médiane) | ~0.999 |
-| Régression Linéaire | ~0.85 |
-| Ridge | ~0.85 |
-| Lasso | ~0.85 |
-| Random Forest | ~0.65–0.68 |
-| Gradient Boosting | ~0.65–0.70 |
-| XGBoost *(si dispo)* | ~0.63–0.67 |
-
-- Le meilleur modèle est ré-entraîné sur tout le train, puis sérialisé dans `model/`
+| Ridge / Lasso | ~0.85 |
+| Random Forest | 0.658 |
+| Gradient Boosting | 0.657 |
 
 ---
 
-## Visualisations générées
+## Pipeline V2 — Améliorations (`src/improve_model.py`)
 
-| Fichier | Contenu |
-|---------|---------|
-| `etape3_valeurs_manquantes.png` | Bar chart horizontal % de valeurs manquantes |
-| `etape4_outliers.png` | Boxplot prix, boxplot surface, scatter prix vs surface |
-| `etape5_univariee.png` | 6 distributions : prix, log(prix), surface, chambres, salons, quartiers |
-| `etape5_bivariee.png` | Boxplot prix/quartier, scatter prix/surface, boxplot prix/chambres, prix médian/quartier |
-| `etape5_correlation.png` | Heatmap de corrélation (prix, surface, chambres, salons, sdb) |
-| `etape6_feature_importance.png` | Top 20 features (bar chart horizontal) |
-| `etape6_comparaison_modeles.png` | RMSLE et R² de tous les modèles vs baseline |
-| `etape6_reel_vs_predit.png` | Scatter réel vs prédit avec droite y=x |
+### Nouvelles features (77 au total)
+
+**TF-IDF + SVD sur titre + description + caractéristiques :**
+- TfidfVectorizer (300 termes, bigrammes) → TruncatedSVD (20 composantes)
+- Exploite le texte arabe et français ensemble
+
+**Mots-clés bilingues supplémentaires :**
+- `has_etage`, `has_duplex`, `has_jardin`, `has_terrasse`, `has_carrelage`
+- `mention_coin`, `mention_prix_neg`, `mention_urgent`, `has_2_facades`
+
+**Features d'interaction :**
+- `surface_x_target` — surface × prix moyen du quartier
+- `chambres_vs_quartier` — écart à la médiane du quartier
+- `surface_vs_quartier` — écart à la surface médiane du quartier
+- `log_surface_x_target`, `densite_pieces`, `surface_squared`
+
+**Encodage amélioré :**
+- Target encoding avec **smoothing** (évite le surajustement sur Riyadh=13 et Sebkha=10 annonces)
+- `quartier_prix_std` — variance du prix par quartier
+
+**Temporel :**
+- `mois_publication`, `trimestre`, `is_weekend`
+
+**Winsorizing :**
+- Clip de la target aux percentiles P1–P99 avant entraînement
+
+### Résultats V2
+
+| Modèle | RMSLE CV |
+|--------|----------|
+| Baseline | ~0.999 |
+| **V1 Random Forest (34 features)** | **0.6576** |
+| CatBoost (77 features) | 0.6330 |
+| Random Forest (77 features) | 0.6390 |
+| Ridge (77 features) | 0.6436 |
+| XGBoost | 0.6475 |
+| Blending pondéré | 0.6344 |
+| **Stacking Ridge méta** | **0.6263** ← meilleur |
+
+**Amélioration : −0.031 RMSLE** par rapport à V1
+
+---
+
+## Déploiement (Phase 5)
+
+### API Flask — `https://mlcapstone.onrender.com`
+
+| Endpoint | Méthode | Description |
+|----------|---------|-------------|
+| `/api/health` | GET | Statut de l'API |
+| `/api/predict` | POST | Estimation du prix d'un bien |
+| `/api/stats` | GET | Statistiques du marché |
+| `/api/quartiers` | GET | Liste des quartiers avec GPS |
+
+### Frontend Next.js — `https://immobilier-nouakchott.vercel.app`
+
+- Page d'accueil : carte Leaflet + statistiques marché + bar charts
+- Page prédiction : formulaire → prix estimé + intervalle de confiance (P10–P90)
+- Page analyse : feature importance + comparaison modèles
 
 ---
 
 ## Installation & Exécution
 
-### Prérequis
-
 ```bash
 pip install -r requirements.txt
+# optionnel pour V2 :
+pip install xgboost lightgbm catboost
 ```
-
-```
-pandas>=2.0
-numpy>=1.24
-scikit-learn>=1.3
-matplotlib>=3.7
-seaborn>=0.12
-joblib>=1.3
-xgboost>=2.0      # optionnel
-lightgbm>=4.0     # optionnel
-```
-
-### Option 1 — Notebooks en séquence
 
 ```bash
-jupyter nbconvert --to notebook --execute notebooks/01_inspection_nettoyage.ipynb
-jupyter nbconvert --to notebook --execute notebooks/02_valeurs_manquantes.ipynb
-jupyter nbconvert --to notebook --execute notebooks/03_eda.ipynb
-jupyter nbconvert --to notebook --execute notebooks/04_feature_engineering.ipynb
-jupyter nbconvert --to notebook --execute notebooks/05_modelisation.ipynb
-```
-
-### Option 2 — Pipeline complet (une seule commande)
-
-```bash
+# Pipeline V1
 python src/pipeline.py
+
+# Pipeline V2 amélioré
+python src/improve_model.py
+
+# API Flask
+cd api && python app.py
+
+# Frontend
+cd frontend && npm run dev
 ```
 
 ---
 
 ## Checklist de validation
 
-- [ ] `data/final/submission.csv` — 289 lignes, colonnes `id` et `prix`
-- [ ] `model/housing_model.pkl` — chargeable avec `joblib.load()`
-- [ ] Tous les notebooks s'exécutent sans erreur
-- [ ] Aucun NaN dans les prédictions
-- [ ] RMSLE en cross-validation < 0.75
-- [ ] 8 figures sauvegardées dans `outputs/figures/`
-- [ ] Aucun data leakage (imputations et encodages calculés sur le train uniquement)
-
----
-
-## Charger le modèle et faire une prédiction
-
-```python
-import joblib
-import pandas as pd
-import numpy as np
-
-model = joblib.load('model/housing_model.pkl')
-features = joblib.load('model/features.pkl')
-
-# X_test doit contenir les 34 features dans le bon ordre
-X_test = pd.DataFrame(...)  # votre jeu de test enrichi
-
-log_pred = model.predict(X_test[features])
-prix_pred = np.maximum(np.expm1(log_pred), 100_000)  # min 100 000 MRU
-```
+- [x] `data/final/submission.csv` — 289 lignes V1
+- [x] `data/final/submission_improved.csv` — 289 lignes V2 (stacking)
+- [x] `model/housing_model.pkl` — Random Forest V1
+- [x] `model/housing_model_improved.pkl` — CatBoost V2
+- [x] API Flask déployée sur Render
+- [x] Frontend Next.js déployé sur Vercel
+- [x] Aucun data leakage (TF-IDF, encodages, imputations fitté sur train uniquement)
+- [x] RMSLE CV V2 = 0.6263 < objectif 0.70
 
 ---
 
@@ -223,10 +251,11 @@ prix_pred = np.maximum(np.expm1(log_pred), 100_000)  # min 100 000 MRU
 | Décision | Justification |
 |----------|--------------|
 | Garder les outliers | Grande variance réelle (villas luxe vs petits biens périphérie) |
-| Prédire `log(1+prix)` | Réduit l'asymétrie et correspond directement à la métrique RMSLE |
-| Target encoding par quartier | Capture l'effet prix du quartier sans risque de leakage (calcul sur train seul) |
-| Indicatrice `has_sdb_info` | 72% de `nb_sdb` manquant — l'absence d'info est elle-même informative |
-| Distances GPS hardcodées | Pas d'accès API en offline — coordonnées vérifiées depuis les référentiels officiels |
+| Prédire `log(1+prix)` | Réduit l'asymétrie, correspond directement à la métrique RMSLE |
+| Target encoding avec smoothing | Évite le surajustement sur quartiers sous-représentés (Riyadh=13, Sebkha=10) |
+| TF-IDF + SVD | Le texte FR/AR contient des signaux forts (étage, jardin, titre foncier) |
+| Stacking vs meilleur modèle seul | +0.007 RMSLE grâce à la diversité des erreurs |
+| Winsorizing P1–P99 | Réduit l'impact des prix aberrants sans supprimer les données |
 
 ---
 

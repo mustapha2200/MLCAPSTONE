@@ -18,6 +18,11 @@ export async function getQuartiers(): Promise<Quartier[]> {
   return res.data;
 }
 
+export async function getModelInfo(): Promise<import('@/types').ModelInfo> {
+  const res = await axios.get(`${API_BASE}/model-info?top=20`);
+  return res.data;
+}
+
 export async function healthCheck(): Promise<boolean> {
   try {
     await axios.get(`${API_BASE}/health`);

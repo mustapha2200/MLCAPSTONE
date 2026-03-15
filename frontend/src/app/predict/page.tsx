@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
-import { predict } from '@/lib/api';
-import { PredictionRequest, PredictionResponse } from '@/types';
+import { useState, useEffect } from 'react';
+import { predict, getQuartiers } from '@/lib/api';
+import { PredictionRequest, PredictionResponse, Quartier } from '@/types';
 import PredictionForm from '@/components/PredictionForm';
 import PredictionResult from '@/components/PredictionResult';
 
@@ -10,6 +10,11 @@ export default function PredictPage() {
   const [loading, setLoading]   = useState(false);
   const [result, setResult]     = useState<PredictionResponse | null>(null);
   const [error, setError]       = useState<string | null>(null);
+  const [quartiers, setQuartiers] = useState<Quartier[]>([]);
+
+  useEffect(() => {
+    getQuartiers().then(setQuartiers).catch(() => {});
+  }, []);
 
   const handleSubmit = async (data: PredictionRequest) => {
     setLoading(true);
@@ -41,7 +46,7 @@ export default function PredictPage() {
         {/* Formulaire */}
         <div className="bg-white rounded-xl shadow-md p-6">
           <h2 className="font-semibold text-gray-800 mb-4">Caractéristiques du bien</h2>
-          <PredictionForm onSubmit={handleSubmit} loading={loading} />
+          <PredictionForm onSubmit={handleSubmit} loading={loading} quartiers={quartiers} />
         </div>
 
         {/* Résultat */}
@@ -68,7 +73,7 @@ export default function PredictPage() {
             </div>
           )}
 
-          {result && <PredictionResult result={result} />}
+          {result && <PredictionResult result={result} quartiers={quartiers} />}
         </div>
       </div>
 

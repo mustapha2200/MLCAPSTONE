@@ -1,16 +1,17 @@
 'use client';
 
-import { QUARTIERS } from '@/lib/constants';
+import { Quartier } from '@/types';
 
 interface Props {
   selected: string;
   onChange: (nom: string) => void;
+  quartiers: Quartier[];
 }
 
-export default function QuartierSelector({ selected, onChange }: Props) {
+export default function QuartierSelector({ selected, onChange, quartiers }: Props) {
   return (
     <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-      {QUARTIERS.map((q) => (
+      {quartiers.map((q) => (
         <button
           key={q.nom}
           onClick={() => onChange(q.nom)}

@@ -1,16 +1,17 @@
 'use client';
 
-import { PredictionResponse } from '@/types';
-import { formatMRU, formatEUR, MRU_TO_EUR, QUARTIERS } from '@/lib/constants';
+import { PredictionResponse, Quartier } from '@/types';
+import { formatMRU, formatEUR, MRU_TO_EUR } from '@/lib/constants';
 import MapComponent from './MapComponent';
 
 interface Props {
   result: PredictionResponse;
+  quartiers: Quartier[];
 }
 
-export default function PredictionResult({ result }: Props) {
-  const q = QUARTIERS.find((q) => q.nom === result.quartier);
-  const center = q ? { lat: q.lat, lon: q.lon } : undefined;
+export default function PredictionResult({ result, quartiers }: Props) {
+  const q = quartiers.find((q) => q.nom === result.quartier);
+  const center = q ? { lat: q.latitude, lon: q.longitude } : undefined;
 
   const isAboveMedian = result.prix_estime > result.comparable.prix_median_quartier;
   const diffPct = result.comparable.prix_median_quartier > 0
@@ -83,10 +84,10 @@ export default function PredictionResult({ result }: Props) {
         <div>
           <h3 className="text-sm font-semibold text-gray-700 mb-2">Localisation — {result.quartier}</h3>
           <MapComponent
-            quartiers={QUARTIERS.map((qq) => ({
+            quartiers={quartiers.map((qq) => ({
               nom: qq.nom,
-              lat: qq.lat,
-              lon: qq.lon,
+              lat: qq.latitude,
+              lon: qq.longitude,
               caractere: qq.caractere,
             }))}
             selected={result.quartier}

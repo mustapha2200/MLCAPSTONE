@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { getStats } from '@/lib/api';
 import { MarketStats } from '@/types';
-import { formatMRU, QUARTIERS } from '@/lib/constants';
+import { formatMRU } from '@/lib/constants';
 import StatsCards from '@/components/StatsCards';
 import MapComponent from '@/components/MapComponent';
 
@@ -24,10 +24,13 @@ export default function HomePage() {
       prix: Math.round((q.prix_median / 1_000_000) * 10) / 10,
     }));
 
-  const mapQuartiers = QUARTIERS.map((q) => {
-    const s = stats?.quartiers.find((sq) => sq.nom === q.nom);
-    return { ...q, prix_median: s?.prix_median };
-  });
+  const mapQuartiers = (stats?.quartiers ?? []).map((q) => ({
+    nom: q.nom,
+    lat: q.latitude,
+    lon: q.longitude,
+    prix_median: q.prix_median,
+    caractere: q.caractere,
+  }));
 
   return (
     <div className="space-y-10">
@@ -38,8 +41,10 @@ export default function HomePage() {
         </h1>
         <h2 className="text-xl text-gray-600 mb-2">Nouakchott, Mauritanie</h2>
         <p className="text-gray-500 max-w-xl mx-auto mb-8">
-          Estimez la valeur de votre bien grâce au Machine Learning —
-          Random Forest entraîné sur 1 153 annonces réelles.
+          Estimez la valeur de votre bien grâce au Machine Learning —{' '}
+          {stats
+            ? `${stats.model_info.nom} entraîné sur ${stats.total_annonces.toLocaleString('fr-FR')} annonces réelles.`
+            : 'modèle ML entraîné sur des annonces réelles à Nouakchott.'}
         </p>
         <Link
           href="/predict"
@@ -130,13 +135,15 @@ export default function HomePage() {
           </div>
           <div>
             <div className="font-semibold text-gray-800 mb-1">📊 Données</div>
-            1 153 annonces immobilières réelles scrappées sur voursa.com.
-            8 quartiers de Nouakchott, prix entre 200K et 54M MRU.
+            {stats
+              ? `${stats.total_annonces.toLocaleString('fr-FR')} annonces immobilières réelles scrappées sur voursa.com. ${stats.quartiers.length} quartiers de Nouakchott.`
+              : 'Annonces immobilières réelles scrappées sur voursa.com à Nouakchott.'}
           </div>
           <div>
             <div className="font-semibold text-gray-800 mb-1">🤖 Modèle</div>
-            Random Forest avec 34 features (géo, texte, surface).
-            RMSLE = 0.6576 vs baseline 0.997 (−34%).
+            {stats?.model_info
+              ? `${stats.model_info.nom} — ${stats.model_info.nb_features} features (géo, texte, surface). RMSLE = ${stats.model_info.rmsle?.toFixed(4) ?? '…'}.`
+              : 'Modèle ML avec features géo, texte et surface.'}
           </div>
         </div>
       </section>
