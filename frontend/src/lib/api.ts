@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { PredictionRequest, PredictionResponse, MarketStats, Quartier } from '@/types';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || '/api';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://mlcapstone.onrender.com/api';
 
 export async function predict(data: PredictionRequest): Promise<PredictionResponse> {
   const res = await axios.post(`${API_BASE}/predict`, data);
