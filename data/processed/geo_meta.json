@@ -89,6 +89,17 @@
       }
     }
   },
+  "taille_rue": {
+    "Tevragh Zeina": 12.0,
+    "Ksar":          8.0,
+    "Teyarett":      7.0,
+    "Sebkha":        7.0,
+    "Arafat":        6.0,
+    "Dar Naim":      6.0,
+    "Riyadh":        6.0,
+    "Toujounine":    5.0
+  },
+  "default_taille_rue": 6.5,
   "reference_points": {
     "centre": {
       "lat": 18.0866,

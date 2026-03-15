@@ -43,6 +43,9 @@ CENTRE_GPS   = (REFERENCE_POINTS['centre']['lat'],   REFERENCE_POINTS['centre'][
 AEROPORT_GPS = (REFERENCE_POINTS['aeroport']['lat'], REFERENCE_POINTS['aeroport']['lon'])
 PLAGE_GPS    = (REFERENCE_POINTS['plage']['lat'],    REFERENCE_POINTS['plage']['lon'])
 
+QUARTIER_TAILLE_RUE = _geo_meta.get('taille_rue', {})
+DEFAULT_TAILLE_RUE  = _geo_meta.get('default_taille_rue', 6.5)
+
 MRU_TO_EUR = 1 / 400
 
 # Infos modèle — lues depuis les fichiers pkl au démarrage de app.py
