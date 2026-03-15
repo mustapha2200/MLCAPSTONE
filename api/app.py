@@ -21,7 +21,11 @@ from config import (
 from predict import build_feature_vector, predict_price
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, origins=[
+    'http://localhost:3000',
+    'https://*.vercel.app',
+    os.environ.get('FRONTEND_URL', ''),
+])
 
 # ── Chargement du modèle et des données au démarrage ──────────────────────────
 
@@ -69,6 +73,11 @@ print("API prête.")
 
 
 # ── Endpoints ─────────────────────────────────────────────────────────────────
+
+@app.route('/', methods=['GET'])
+def root():
+    return jsonify({'status': 'ok', 'service': 'ImmobilierNK API'})
+
 
 @app.route('/api/health', methods=['GET'])
 def health():
