@@ -1,60 +1,50 @@
 {
   "gps": {
+    "Arafat": [
+      18.045951,
+      -15.963284
+    ],
     "Tevragh Zeina": [
       18.111144,
       -16.00384
-    ],
-    "Sebkha": [
-      18.071167,
-      -16.002607
-    ],
-    "Ksar": [
-      18.104903,
-      -15.964434
     ],
     "Teyarett": [
       18.159145,
       -15.927189
     ],
-    "Dar Naim": [
-      18.126633,
-      -15.91746
-    ],
-    "Arafat": [
-      18.045951,
-      -15.963284
-    ],
     "Toujounine": [
       18.072432,
       -15.9099
     ],
+    "Sebkha": [
+      18.071167,
+      -16.002607
+    ],
+    "Dar Naim": [
+      18.126633,
+      -15.91746
+    ],
+    "Ksar": [
+      18.104903,
+      -15.964434
+    ],
     "Riyadh": [
       18.010714,
       -15.955326
-    ],
-    "El Mina": [
-      18.064978,
-      -15.977073
     ]
   },
   "poi": {
+    "Arafat_1000m": {
+      "ecoles": 14,
+      "mosquees": 21,
+      "commerces": 26,
+      "hopitaux": 9
+    },
     "Tevragh Zeina_1000m": {
       "ecoles": 3,
       "mosquees": 3,
       "commerces": 17,
       "hopitaux": 2
-    },
-    "Sebkha_1000m": {
-      "ecoles": 7,
-      "mosquees": 10,
-      "commerces": 53,
-      "hopitaux": 6
-    },
-    "Ksar_1000m": {
-      "ecoles": 8,
-      "mosquees": 3,
-      "commerces": 60,
-      "hopitaux": 15
     },
     "Teyarett_1000m": {
       "ecoles": 0,
@@ -62,35 +52,35 @@
       "commerces": 0,
       "hopitaux": 0
     },
-    "Dar Naim_1000m": {
-      "ecoles": 2,
-      "mosquees": 8,
-      "commerces": 2,
-      "hopitaux": 1
-    },
-    "Arafat_1000m": {
-      "ecoles": 14,
-      "mosquees": 21,
-      "commerces": 26,
-      "hopitaux": 9
-    },
     "Toujounine_1000m": {
       "ecoles": 6,
       "mosquees": 5,
       "commerces": 5,
       "hopitaux": 6
     },
+    "Sebkha_1000m": {
+      "ecoles": 7,
+      "mosquees": 10,
+      "commerces": 53,
+      "hopitaux": 6
+    },
+    "Dar Naim_1000m": {
+      "ecoles": 2,
+      "mosquees": 8,
+      "commerces": 2,
+      "hopitaux": 1
+    },
+    "Ksar_1000m": {
+      "ecoles": 8,
+      "mosquees": 3,
+      "commerces": 61,
+      "hopitaux": 15
+    },
     "Riyadh_1000m": {
       "ecoles": 5,
       "mosquees": 27,
       "commerces": 2,
       "hopitaux": 3
-    },
-    "El Mina_1000m": {
-      "ecoles": 7,
-      "mosquees": 5,
-      "commerces": 29,
-      "hopitaux": 4
     }
   }
 }
