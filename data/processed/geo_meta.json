@@ -91,13 +91,13 @@
   },
   "taille_rue": {
     "Tevragh Zeina": 12.0,
-    "Ksar":          8.0,
-    "Teyarett":      7.0,
-    "Sebkha":        7.0,
-    "Arafat":        6.0,
-    "Dar Naim":      6.0,
-    "Riyadh":        6.0,
-    "Toujounine":    5.0
+    "Ksar": 8.0,
+    "Teyarett": 7.0,
+    "Sebkha": 7.0,
+    "Arafat": 6.0,
+    "Dar Naim": 6.0,
+    "Riyadh": 6.0,
+    "Toujounine": 5.0
   },
   "default_taille_rue": 6.5,
   "reference_points": {
@@ -196,15 +196,43 @@
     "has_carrelage": 0.0,
     "has_2_facades": 0.0
   },
-  "cv_rmsle": 0.6263,
+  "cv_rmsle": 0.56705,
   "cv_r2": null,
   "model_comparison": [
-    { "name": "Baseline",         "rmsle": 0.999, "r2": 0.00  },
-    { "name": "Ridge",            "rmsle": 0.812, "r2": 0.32  },
-    { "name": "Random Forest",    "rmsle": 0.658, "r2": 0.56  },
-    { "name": "XGBoost",          "rmsle": 0.648, "r2": 0.58  },
-    { "name": "LightGBM",         "rmsle": 0.641, "r2": 0.59  },
-    { "name": "CatBoost",         "rmsle": 0.638, "r2": 0.60  },
-    { "name": "Stacking",         "rmsle": 0.626, "r2": 0.62  }
+    {
+      "name": "Baseline",
+      "rmsle": 0.999,
+      "r2": 0.0
+    },
+    {
+      "name": "Ridge",
+      "rmsle": 0.812,
+      "r2": 0.32
+    },
+    {
+      "name": "Random Forest",
+      "rmsle": 0.658,
+      "r2": 0.56
+    },
+    {
+      "name": "XGBoost",
+      "rmsle": 0.648,
+      "r2": 0.58
+    },
+    {
+      "name": "LightGBM",
+      "rmsle": 0.641,
+      "r2": 0.59
+    },
+    {
+      "name": "CatBoost",
+      "rmsle": 0.638,
+      "r2": 0.6
+    },
+    {
+      "name": "Stacking",
+      "rmsle": 0.626,
+      "r2": 0.62
+    }
   ]
 }
