@@ -4,6 +4,13 @@ Projet Capstone Machine Learning — Master 1 SupNum (Mauritanie)
 Compétition Kaggle interne évaluée sur le **RMSLE** (Root Mean Squared Logarithmic Error)
 
 ---
+##  Nom de l’equipe : Samsar 2.0
+
+## Membres d’equipe : 
+
+Moustapha Mohamed -> 22013
+Mouhamedou Yahya Cheikh Med Vall -> 25239
+Mohamed Dhmin -> 22040
 
 ## Résultats
 
